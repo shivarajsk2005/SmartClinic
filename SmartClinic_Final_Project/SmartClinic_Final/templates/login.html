@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="form-card client-login">
+    <span class="eyebrow">CLIENT PORTAL</span>
+    <h1>Client login</h1>
+    <p class="muted">Access your appointments and book a visit.</p>
+    <form method="POST">
+        <label>Email</label>
+        <input type="email" name="email" id="loginEmail" value="{{ request.form.get('email','') }}" required autofocus>
+        <label>Password</label>
+        <input type="password" name="password" required>
+        <button class="button full" type="submit">Login</button>
+    </form>
+    <p class="center">New client? <a href="{{ url_for('register') }}">Create account</a></p>
+    <p class="portal-switch">Are you a doctor? <a href="{{ url_for('doctor_login') }}">Go to doctor login</a></p>
+</div>
+{% endblock %}

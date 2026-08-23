@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Book Appointment{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">PATIENT PORTAL</span><h1>Book an appointment</h1><p>Active doctors are available every day according to their timings. Slots are generated every 30 minutes.</p></div></div>
+
+<div class="form-card wide">
+<form method="POST" id="bookingForm">
+    <label>Hospital</label>
+    <div class="search-row">
+        <input type="search" id="hospital_search" placeholder="Search hospital or city">
+    </div>
+    <select name="hospital_name" id="hospital_name" required>
+        <option value="">Select a hospital first</option>
+        {% for hospital in hospitals %}
+        <option value="{{ hospital.hospital_name }}">{{ hospital.hospital_name }} — {{ hospital.city }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Doctor</label>
+    <select name="doctor_id" id="doctor_id" required disabled>
+        <option value="">Select a hospital first</option>
+        {% for d in doctors %}
+        <option value="{{ d.id }}" data-hospital="{{ d.hospital_name }}" data-time="{{ d.available_time }}" data-active="{{ d.is_active }}" {% if not d.is_active %}disabled{% endif %}>{{ d.name }} — {{ d.specialization }} ({{ 'Active' if d.is_active else 'Inactive' }})</option>
+        {% endfor %}
+    </select>
+
+    <div id="availability" class="availability">Select a doctor to see availability.</div>
+
+    <label>Appointment date</label>
+    <input type="date" name="appointment_date" id="appointment_date" min="{{ today }}" required>
+
+    <label>Available time</label>
+    <select name="appointment_time" id="appointment_time" required disabled>
+        <option value="">Select a doctor first</option>
+    </select>
+
+    <button class="button full" type="submit">Confirm Appointment</button>
+</form>
+</div>
+
+<script>
+const doctorSelect = document.getElementById("doctor_id");
+const hospitalSelect = document.getElementById("hospital_name");
+const hospitalSearch = document.getElementById("hospital_search");
+const allHospitalOptions = Array.from(hospitalSelect.options)
+    .filter(option => option.value)
+    .map(option => option.cloneNode(true));
+const timeSelect = document.getElementById("appointment_time");
+const dateSelect = document.getElementById("appointment_date");
+const availability = document.getElementById("availability");
+
+function formatTime(hm) {
+    const [h, m] = hm.split(":").map(Number);
+    const suffix = h >= 12 ? "PM" : "AM";
+    const hour = h % 12 || 12;
+    return `${String(hour).padStart(2,"0")}:${String(m).padStart(2,"0")} ${suffix}`;
+}
+
+function makeSlots(range) {
+    if (!range) return [];
+    const [startS, endS] = range.split("-");
+    const [sh, sm] = startS.split(":").map(Number);
+    const [eh, em] = endS.split(":").map(Number);
+    let current = sh * 60 + sm;
+    const end = eh * 60 + em;
+    const result = [];
+    while (current < end) {
+        const h = Math.floor(current / 60);
+        const m = current % 60;
+        result.push(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`);
+        current += 30;
+    }
+    return result;
+}
+
+function updateAvailability() {
+    const option = doctorSelect.options[doctorSelect.selectedIndex];
+    const range = option ? option.dataset.time || "" : "";
+    const isActive = option && option.dataset.active === "1";
+    if (!range || !isActive) return;
+    const selectedDate = dateSelect.value;
+    const dateLabel = selectedDate ? ` on ${selectedDate}` : " daily";
+    availability.textContent = "Available" + dateLabel + ": " + range.split("-").map(formatTime).join(" - ");
+}
+
+doctorSelect.addEventListener("change", function() {
+    const option = this.options[this.selectedIndex];
+    const range = option.dataset.time || "";
+    const isActive = option.dataset.active === "1";
+    timeSelect.innerHTML = "";
+    if (!range || !isActive) {
+        availability.textContent = !isActive && range ? "This doctor is currently inactive and cannot accept appointments." : "Select an active doctor to see availability.";
+        timeSelect.disabled = true;
+        return;
+    }
+    updateAvailability();
+    makeSlots(range).forEach(slot => {
+        const opt = document.createElement("option");
+        opt.value = slot;
+        opt.textContent = formatTime(slot);
+        timeSelect.appendChild(opt);
+    });
+    timeSelect.disabled = false;
+});
+
+hospitalSelect.addEventListener("change", function() {
+    const hospital = this.value;
+    doctorSelect.value = "";
+    doctorSelect.disabled = !hospital;
+    Array.from(doctorSelect.options).forEach(option => {
+        const matches = option.value && option.dataset.hospital === hospital;
+        option.hidden = Boolean(option.value) && !matches;
+        option.disabled = Boolean(option.value) && (!matches || option.dataset.active !== "1");
+    });
+    timeSelect.innerHTML = '<option value="">Select a doctor first</option>';
+    timeSelect.disabled = true;
+    availability.textContent = hospital ? "Select an active doctor to see availability." : "Select a hospital first.";
+});
+
+dateSelect.addEventListener("change", updateAvailability);
+
+function filterHospitals() {
+    const searchTerm = hospitalSearch.value.trim().toLowerCase();
+    const matches = allHospitalOptions.filter(option =>
+        option.textContent.toLowerCase().includes(searchTerm)
+    );
+    hospitalSelect.innerHTML = "<option value=\"\">" +
+        (matches.length ? "Select a hospital" : "No hospitals found") +
+        "</option>";
+    matches.forEach(option => hospitalSelect.appendChild(option.cloneNode(true)));
+    hospitalSelect.value = "";
+    hospitalSelect.dispatchEvent(new Event("change"));
+}
+
+hospitalSearch.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        filterHospitals();
+    }
+});
+</script>
+{% endblock %}

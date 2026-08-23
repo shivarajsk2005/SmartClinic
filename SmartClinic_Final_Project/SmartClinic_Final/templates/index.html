@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}SmartClinic{% endblock %}
+{% block content %}
+<section class="hero">
+    <div>
+        <span class="eyebrow">DIGITAL CLINIC MANAGEMENT</span>
+        <h1>Healthcare appointments made simple.</h1>
+        <p>SmartClinic connects patients and doctors with secure login, availability-based booking, appointment editing and status tracking.</p>
+        <div class="actions">
+            <a class="button" href="{{ url_for('register') }}">Get Started</a>
+            <a class="button secondary" href="{{ url_for('login') }}">Client Login</a>
+            <a class="button doctor-button" href="{{ url_for('doctor_login') }}">Doctor Login</a>
+        </div>
+    </div>
+</section>
+<section class="cards">
+    <div class="card"><h3>Patient Booking</h3><p>Choose a doctor, date and available time slot.</p></div>
+    <div class="card"><h3>Doctor Dashboard</h3><p>Doctors can view and update patient appointments.</p></div>
+    <div class="card"><h3>Stored Data</h3><p>Users, doctors and appointments are stored in SQLite.</p></div>
+</section>
+{% endblock %}

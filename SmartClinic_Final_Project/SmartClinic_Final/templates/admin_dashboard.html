@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">ADMIN PORTAL</span><h1>System Overview</h1></div></div>
+<div class="table-wrap">
+<h2>Users</h2>
+<table><thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+<tbody>{% for u in users %}<tr><td>{{ u.name }}</td><td>{{ u.email }}</td><td>{{ u.role }}</td></tr>{% endfor %}</tbody></table>
+</div>
+<div class="table-wrap">
+<h2>Appointments</h2>
+<table><thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+<tbody>{% for a in appointments %}<tr><td>{{ a.patient }}</td><td>{{ a.doctor }}</td><td>{{ a.appointment_date }}</td><td>{{ a.appointment_time }}</td><td>{{ a.status }}</td></tr>{% endfor %}</tbody></table>
+</div>
+{% endblock %}

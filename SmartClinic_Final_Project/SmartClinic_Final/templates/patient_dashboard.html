@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div><span class="eyebrow">PATIENT PORTAL</span><h1>Hello, {{ current_user.name }}</h1><p>Manage your clinic appointments from one place.</p></div>
+</div>
+<div class="cards">
+    <a class="card link-card" href="{{ url_for('book_appointment') }}"><h3>Book Appointment</h3><p>Find a doctor and choose an available slot.</p></a>
+    <a class="card link-card" href="{{ url_for('my_appointments') }}"><h3>My Appointments</h3><p>View, edit or cancel your appointment.</p></a>
+    <a class="card link-card" href="{{ url_for('profile') }}"><h3>Account Settings</h3><p>Update your name, email or password.</p></a>
+</div>
+{% endblock %}
